@@ -17,7 +17,7 @@ using BepInEx.Logging;
 
 namespace SimpleTextureReplacer
 {
-    [BepInPlugin("com.aidanamite.SimpleTextureReplacer", "Simple Texture Replacer", "1.0.1")]
+    [BepInPlugin("com.aidanamite.SimpleTextureReplacer", "Simple Texture Replacer", "1.0.2")]
     [BepInDependency("com.aidanamite.ConfigTweaks")]
     public class Main : BaseUnityPlugin
     {
@@ -86,7 +86,7 @@ namespace SimpleTextureReplacer
                     var key = (X?)keyField.GetValue(r.keys);
                     if (key != null)
                     {
-                        if (d.TryGetValue(key.Value, out var td) && td.qualities.Any(x => x.name == r.texture.name))
+                        if (d.TryGetValue(key.Value, out var td) && td.qualities.Any(x => x && x.name == r.texture.name))
                         {
                             Texture[] last = new Texture[r.keys.qualityIndex + 1];
                             foreach (var p in loaded.Values)
@@ -96,7 +96,7 @@ namespace SimpleTextureReplacer
                                     last[p.keys.qualityIndex] = p.texture;
                             }
                             for (int i = 0; i < last.Length; i++)
-                                if (td.qualities[i].name == r.texture.name)
+                                if (td.qualities[i] && td.qualities[i].name == r.texture.name)
                                     td.qualities[i] = last[i];
                             if (last.Any(x => x))
                                 logger.LogInfo($"Image \"{r.texture.name}\" unloaded and replaced by existing images\n{key.Value.GetTupleString(keyField)}");
