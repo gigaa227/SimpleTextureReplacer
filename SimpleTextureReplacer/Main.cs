@@ -17,7 +17,7 @@ using BepInEx.Logging;
 
 namespace SimpleTextureReplacer
 {
-    [BepInPlugin("com.aidanamite.SimpleTextureReplacer", "Simple Texture Replacer", "1.0.0")]
+    [BepInPlugin("com.aidanamite.SimpleTextureReplacer", "Simple Texture Replacer", "1.0.1")]
     [BepInDependency("com.aidanamite.ConfigTweaks")]
     public class Main : BaseUnityPlugin
     {
@@ -317,6 +317,7 @@ namespace SimpleTextureReplacer
                 Main.logger.LogInfo($"LoadGameObject  bundle={bd.name},resource={s}");
             TryChange(bd.name, s, __result);
         }
+        static FieldInfo[] skinMaterials = typeof(DragonSkin).GetFields(~BindingFlags.Default).Where(x => x.Name.Contains("Materials")).ToArray();
         public static void TryChange(string bundle,string resource, GameObject target)
         {
             if (Main.logging)
@@ -325,20 +326,29 @@ namespace SimpleTextureReplacer
             {
                 if (Main.logging)
                     Main.logger.LogInfo($"TryChange lookup found potential key");
+                void TryEditMat(Material mat)
+                {
+                    if (mat)
+                        for (int i = 0; i < mat.shader.GetPropertyCount(); i++)
+                            if (mat.shader.GetPropertyType(i) == UnityEngine.Rendering.ShaderPropertyType.Texture)
+                            {
+                                var ot = mat.GetTexture(mat.shader.GetPropertyName(i));
+                                if (ot && Main.replacements2.TryGetValue((bundle, resource, ot.name), out var td))
+                                {
+                                    var t = td.GetCurrent();
+                                    if (t)
+                                        mat.SetTexture(mat.shader.GetPropertyName(i), t);
+                                }
+                            }
+                }
                 foreach (var rend in target.GetComponentsInChildren<Renderer>(true))
                     foreach (var m in rend.sharedMaterials)
-                        if (m)
-                            for (int i = 0; i < m.shader.GetPropertyCount(); i++)
-                                if (m.shader.GetPropertyType(i) == UnityEngine.Rendering.ShaderPropertyType.Texture)
-                                {
-                                    var ot = m.GetTexture(m.shader.GetPropertyName(i));
-                                    if (ot && Main.replacements2.TryGetValue((bundle, resource, ot.name), out var td))
-                                    {
-                                        var t = td.GetCurrent();
-                                        if (t)
-                                            m.SetTexture(m.shader.GetPropertyName(i), t);
-                                    }
-                                }
+                        TryEditMat(m);
+                foreach (var skin in target.GetComponentsInChildren<DragonSkin>(true))
+                    foreach (var f in skinMaterials)
+                        if (f.GetValue(skin) is Material[] a)
+                            foreach (var m in a)
+                                TryEditMat(m);
                 foreach (var widget in target.GetComponentsInChildren<UITexture>(true))
                 {
                     if (widget && widget.mainTexture && Main.replacements2.TryGetValue((bundle, resource, widget.mainTexture.name), out var td))
