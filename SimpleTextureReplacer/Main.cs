@@ -1,5 +1,4 @@
 ﻿using BepInEx;
-using ConfigTweaks;
 using HarmonyLib;
 using System;
 using System.Collections;
@@ -17,8 +16,7 @@ using BepInEx.Logging;
 
 namespace SimpleTextureReplacer
 {
-    [BepInPlugin("com.aidanamite.SimpleTextureReplacer", "Simple Texture Replacer", "1.0.2")]
-    [BepInDependency("com.aidanamite.ConfigTweaks")]
+    [BepInPlugin("com.aidanamite.SimpleTextureReplacer", "Simple Texture Replacer", "1.0.3")]
     public class Main : BaseUnityPlugin
     {
         public static string CustomResources = Environment.CurrentDirectory + "\\ReplacementTextures";

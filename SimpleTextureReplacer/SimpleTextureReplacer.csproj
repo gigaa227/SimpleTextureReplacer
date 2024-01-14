@@ -60,10 +60,6 @@
       <HintPath>D:\program\sod\BepInEx\core\BepInEx.Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="ConfigTweaks">
-      <HintPath>..\..\ConfigTweaks\ConfigTweaks\bin\Debug\ConfigTweaks.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Mono.Cecil">
       <HintPath>D:\program\sod\BepInEx\core\Mono.Cecil.dll</HintPath>
       <Private>False</Private>
