@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -16,7 +17,7 @@ using BepInEx.Logging;
 
 namespace SimpleTextureReplacer
 {
-    [BepInPlugin("com.aidanamite.SimpleTextureReplacer", "Simple Texture Replacer", "1.0.3")]
+    [BepInPlugin("com.aidanamite.SimpleTextureReplacer", "Simple Texture Replacer", "1.1.0")]
     public class Main : BaseUnityPlugin
     {
         public static string CustomResources = Environment.CurrentDirectory + "\\ReplacementTextures";
@@ -25,6 +26,7 @@ namespace SimpleTextureReplacer
         public static HashSet<(string bundle, string resource)> replacement2lookup = new HashSet<(string, string)>();
         public static Dictionary<string, (Texture texture, Keys keys)> loaded = new Dictionary<string, (Texture, Keys)>();
         public static Dictionary<Texture, List<Texture>> generated = new Dictionary<Texture, List<Texture>>();
+        public static Dictionary<string, Dictionary<string, object>> zippedFiles = new Dictionary<string, Dictionary<string, object>>();
         public static ConcurrentQueue<string> filechanges = new ConcurrentQueue<string>();
 
         public static ManualLogSource logger;
@@ -34,7 +36,18 @@ namespace SimpleTextureReplacer
             logger = Logger;
             if (!Directory.Exists(CustomResources))
                 Directory.CreateDirectory(CustomResources);
+            if (File.Exists(CustomResources + "\\DEBUG"))
+                logging = true;
             foreach (var f in Directory.GetFiles(CustomResources,"*.png",SearchOption.AllDirectories))
+                try
+                {
+                    CheckImageFile(f);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError(e);
+                }
+            foreach (var f in Directory.GetFiles(CustomResources, "*.zip", SearchOption.AllDirectories))
                 try
                 {
                     CheckImageFile(f);
@@ -56,8 +69,6 @@ namespace SimpleTextureReplacer
             listener.IncludeSubdirectories = true;
             listener.EnableRaisingEvents = true;
             new Harmony("com.aidanamite.SimpleTextureReplacer").PatchAll();
-            if (File.Exists(CustomResources + "\\DEBUG"))
-                logging = true;
             Logger.LogInfo("Loaded");
         }
 
@@ -71,7 +82,75 @@ namespace SimpleTextureReplacer
         {
             if (file == null)
                 return;
-            file = file.ToLowerInvariant().ToLower();
+            file = file.ToLowerInvariant();
+            if (file.EndsWith(".zip"))
+            {
+                if (zippedFiles.TryGetValue(file,out var h))
+                {
+                    zippedFiles.Remove(file);
+                    foreach (var k in h.Keys)
+                        if (k.EndsWith(".png"))
+                            CheckImageFile(k);
+                }
+                if (File.Exists(file))
+                {
+                    h = null;
+                    try
+                    {
+                        if (logging)
+                            logger.LogInfo($"Starting read of zip file {file}");
+                        using (var read = File.OpenRead(file))
+                        using (var zip = new ZipArchive(read, ZipArchiveMode.Read))
+                        {
+                            h = zippedFiles.GetOrCreate(file);
+                            foreach (var entry in zip.Entries)
+                            {
+                                if (entry.FullName.ToLowerInvariant().EndsWith(".png") || entry.FullName.ToLowerInvariant().EndsWith(".png.meta"))
+                                    using (var stream = entry.Open())
+                                    {
+                                        if (entry.FullName.ToLowerInvariant().EndsWith(".png"))
+                                        {
+                                            var mem = new List<byte>();
+                                            var val = 0;
+                                            while ((val = stream.ReadByte()) != -1)
+                                                mem.Add((byte)val);
+                                            h[file + "|" + entry.FullName.ToLowerInvariant()] = mem.ToArray();
+                                            if (logging)
+                                                logger.LogInfo($"Read image entry {entry.FullName} - Length: {mem.Count}");
+                                        }
+                                        else
+                                        {
+                                            using (var mem = new StreamReader(stream, Encoding.UTF8))
+                                            {
+                                                var l = new List<string>();
+                                                var line = "";
+                                                while ((line = mem.ReadLine()) != null)
+                                                    l.Add(line);
+                                                h[file + "|" + entry.FullName.ToLowerInvariant()] = l.ToArray();
+                                                if (logging)
+                                                    logger.LogInfo($"Read meta entry {entry.FullName} - Length: {l.Count}");
+                                            }
+                                        }
+                                    }
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        zippedFiles.Remove(file);
+                        logger.LogError(e);
+                        return;
+                    }
+                    if (logging)
+                        logger.LogInfo("Zip read complete. Attmpting to load contents");
+                    foreach (var k in h.Keys)
+                        if (k.EndsWith(".png"))
+                            CheckImageFile(k);
+                    foreach (var k in h.Keys.ToArray())
+                        h[k] = null;
+                }
+                return;
+            }
             if (file.EndsWith(".meta"))
                 file = file.Remove(file.Length - 5);
             if (!file.EndsWith(".png"))
@@ -124,9 +203,9 @@ namespace SimpleTextureReplacer
                 Destroy(r.texture);
             }
             var metaFile = file + ".meta";
-            if (!File.Exists(file) || !File.Exists(metaFile))
+            if (!FileExists(file) || !FileExists(metaFile))
                 return;
-            var meta = File.ReadAllLines(metaFile);
+            var meta = FileReadAllLines(metaFile);
             if (meta.Length < 2)
             {
                 logger.LogError($"Could not load custom resource \"{file}\". Reason: Invalid meta file");
@@ -171,7 +250,7 @@ namespace SimpleTextureReplacer
             t.name = file;
             try
             {
-                t.LoadImage(File.ReadAllBytes(file));
+                t.LoadImage(FileReadAllBytes(file));
                 t.Compress(true);
             }
             catch (Exception e)
@@ -197,6 +276,34 @@ namespace SimpleTextureReplacer
             else
                 logger.LogInfo($"{meta[0].CapitalizeInvariant()} image \"{t.name}\" loaded but not enabled because \"{data.qualities[q].name}\" has a higher priority\n{(type == 0 ? keys.image.Value.GetTupleString(Keys.Image) : keys.material.Value.GetTupleString(Keys.Material))}");
             
+        }
+
+        static bool FileExists(string filename)
+        {
+            var i = filename.IndexOf('|');
+            if (i == -1)
+                return File.Exists(filename);
+            return zippedFiles.TryGetValue(filename.Remove(i), out var contents) && contents.ContainsKey(filename);
+        }
+
+        static string[] FileReadAllLines(string filename)
+        {
+            var i = filename.IndexOf('|');
+            if (i == -1)
+                return File.ReadAllLines(filename);
+            if (zippedFiles.TryGetValue(filename.Remove(i), out var contents) && contents.TryGetValue(filename, out var value) && value is string[] lines)
+                return lines;
+            throw new FileNotFoundException("The zipped file could not be found",filename);
+        }
+
+        static byte[] FileReadAllBytes(string filename)
+        {
+            var i = filename.IndexOf('|');
+            if (i == -1)
+                return File.ReadAllBytes(filename);
+            if (zippedFiles.TryGetValue(filename.Remove(i), out var contents) && contents.TryGetValue(filename, out var value) && value is byte[] data)
+                return data;
+            throw new FileNotFoundException("The zipped file could not be found", filename);
         }
 
         static Dictionary<string,int> Qualities = new Dictionary<string, int>
@@ -237,6 +344,7 @@ namespace SimpleTextureReplacer
                     RenderTexture.active = prev;
                     RenderTexture.ReleaseTemporary(tmp);
                     nt.name = qualities[i].name;
+                    nt.Compress(true);
                     Main.generated.GetOrCreate(qualities[i]).Add(nt);
                     qualities[Main.CurrentQualityIndex] = nt;
                     return qualities[i];
