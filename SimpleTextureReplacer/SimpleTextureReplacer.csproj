@@ -7,8 +7,8 @@
     <ProjectGuid>{815B92A8-E71C-4768-9ED2-01B7EC221286}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SimpleTextureReplacer</RootNamespace>
-    <AssemblyName>SimpleTextureReplacer</AssemblyName>
+    <RootNamespace>SimpleResourceReplacer</RootNamespace>
+    <AssemblyName>SimpleResourceReplacer</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -36,8 +36,16 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ExtentionMethods.cs" />
+    <Compile Include="Keys.cs" />
     <Compile Include="Main.cs" />
+    <Compile Include="PatchMethods.cs" />
+    <Compile Include="Patch_CoBundleLoader.cs" />
+    <Compile Include="Patch_RsResourceManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="AssetReplacer.cs" />
+    <Compile Include="ReplacementAssets.cs" />
+    <Compile Include="TextureLoader.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
@@ -102,6 +110,10 @@
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
       <HintPath>D:\program\sod\DOMain_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>D:\program\sod\DOMain_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
