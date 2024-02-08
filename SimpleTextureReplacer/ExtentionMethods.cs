@@ -2,6 +2,9 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using UnityEngine;
+using System;
+using Object = UnityEngine.Object;
 
 namespace SimpleResourceReplacer
 {
@@ -69,6 +72,50 @@ namespace SimpleResourceReplacer
             if (num % 10 == 3)
                 return num + "rd";
             return num + "th";
+        }
+
+        static FieldInfo _mInventory = typeof(CommonInventoryData).GetField("mInventory", ~BindingFlags.Default);
+        public static Dictionary<int, List<UserItemData>> GetInventory(this CommonInventoryData data) => (Dictionary<int, List<UserItemData>>)_mInventory.GetValue(data);
+
+        public static void DestroyAll<T>(this IEnumerable<T> objs,Func<T,GameObject> cast = null) where T : Object
+        {
+            if (objs == null)
+                return;
+            foreach (var i in objs)
+                if (i)
+                {
+                    if (cast == null)
+                        Object.Destroy(i);
+                    else
+                    {
+                        var o = cast(i);
+                        if (o)
+                            Object.Destroy(o);
+                    }
+                }
+        }
+
+        public static void InstatiateAll<T>(this IList<T> objs, Action<T,T> tweak = null) where T : Object
+        {
+            if (objs == null)
+                return;
+            for (var i = 0; i < objs.Count; i++)
+                if (objs[i])
+                {
+                    var o = objs[i];
+                    objs[i] = Object.Instantiate(o);
+                    tweak?.Invoke(objs[i], o);
+                }
+        }
+
+        public static bool TryGetFileHandler<T>(this IDictionary<string,T> types, string file, out T handler) => types.TryGetValue(file.After('.',true), out handler);
+
+        public static string After(this string original, char delimeter, bool inclusive = false)
+        {
+            var split = original.LastIndexOf(delimeter);
+            if (split == -1)
+                return original;
+            return original.Remove(0, split + (inclusive ? 0 : 1));
         }
     }
 }

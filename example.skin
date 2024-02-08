@@ -1,0 +1,40 @@
+{ // This file is in JSON format and any text after a // is comment that doesn't need to be included in your file
+	"Name": "Skin Name Here", // This is the display name of the skin
+	"ItemID": 1000000, // This must be unique. It cannot be the same as another item from the game or another pack's skin. It's recommend to mention your pack ids when sharing the pack
+	"SkinIcon": "RS_SHARED/customassets/IconName", // This is the bundle resource url used for fetching the skin's icon. The "RS_SHARED/customassets" bundle *must* be used for adding new icons
+	"TargetRenderers": [ "DragonRendererName" ], // This is name of the dragon's renderer component. Try checking out other item's data using "DEBUG" mode to see what you should set this to
+	"MaterialData": [ // This controls the properties set on the different materials of the skin. You can set as many properties as you want here. Note: If no teen values are given, the game will use the adult material data for teens
+		{
+			"Target": "Adult", // This controls which material the property is set on. This must specify the age it's being applied to "Baby", "Teen", "Adult" or "Titan", then it *can* be followed by either "Eye" or "Body". If eye or body is not specified, it will affect both
+			"Property": "_DetailTex", // This is the target property of the material. For texture properties it can be "_BumpMap", "_ColorMask", "_DecalMap", "_DetailTex", "_EmissiveMap", "_MKGlowTex" or "_SpecularMap"
+			"Value": "RS_SHARED/mydragonskins/my_textureName" // To specify a texture you put in the asset url of the texture
+		},
+		{
+			"Target": "AdultBody",
+			"Property": "_SpecColor", // For color properties it can be "_EmissiveColor", "_MKGlowColor", "_MKGlowTexColor" or "_SpecColor"
+			"Value": "333333" // To specify a color, use the color's hex string. It can either be "RRGGBB" or "AARRGGBB"
+		},
+		{
+			"Target": "TitanEye",
+			"Property": "_Glossiness", // For number properties it can be "_BumpStrength", "_DecalOpacity", "_Glossiness", "_MKGlowPower", "_MKGlowTexStrength"
+			"Value": "0.9" // Despite being a number, you still need to write the number in " "
+		}
+	],
+	"HWMaterialData": [ // Optional: This is used to set the appearance of the skin in the hidden world. If not included, it will use the default hidden world skin. If left empty "[]", it will just keep the skin enabled in the hidden world. If material data is provided, it will add those properties to the skin when entering the hidden world
+		{
+			"Target": "Adult",
+			"Property": "_MKGlowTex",
+			"Value": "RS_SHARED/mydragonskins/glow_tex"
+		},
+		{
+			"Target": "Adult",
+			"Property": "_MKGlowPower",
+			"Value": "0.2"
+		}
+	],
+	"PetType": 111, // This is the "pet type id" of the type of dragon this skin can be equipped on. Try checking out other item's data using "DEBUG" mode to see what you should set this to
+	"Mesh": { // Optional: This is used to set the skin's custom meshes. Note: If teen model is not set, the game will use the adult model for teens. You can set "Baby", "Teen", "Adult" and or "Titan". Any model not set will reuse the og model
+		"Adult": "RS_SHARED/mydragonskins/Model", // This is an asset url of the model to use
+		"Titan": "RS_SHARED/mydragonskins/ModelTitan"
+	}
+}

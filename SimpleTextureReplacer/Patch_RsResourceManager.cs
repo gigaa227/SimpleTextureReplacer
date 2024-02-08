@@ -53,5 +53,17 @@ namespace SimpleResourceReplacer
             if (go && Main.GameObjects.TryGetValue((inBundlePath, inAssetName), out var d))
                 PatchMethods.TryChange(inBundlePath, inAssetName, go);
         }
+        [HarmonyPatch("Load")]
+        [HarmonyPrefix]
+        static bool Load(string inURL, RsResourceEventHandler inCallback, object inUserData, ref object __result)
+        {
+            if (inURL == Main.CustomBundleName)
+            {
+                inCallback(RsResourceManager.FormatBundleURL(inURL), RsResourceLoadEvent.COMPLETE, 1, Main.dummyBundle, inUserData);
+                __result = null;
+                return false;
+            }
+            return true;
+        }
     }
 }

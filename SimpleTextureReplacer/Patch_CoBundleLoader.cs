@@ -33,6 +33,25 @@ namespace SimpleResourceReplacer
             return true;
         }
         [HarmonyPatch("LoadGameObject")]
+        [HarmonyPrefix]
+        static bool LoadGameObject(AssetBundle bd, string s, ref GameObject __result)
+        {
+            if (bd == Main.dummyBundle)
+            {
+                if (Main.logging)
+                    Main.logger.LogInfo($"LoadGameObject using custom bundle [resource={s}]");
+                var skin = CustomSkin.GetCustomAsset(s);
+                if (skin == null)
+                {
+                    Main.logger.LogWarning($"Custom asset {s} not found?");
+                    return true;
+                }
+                __result = skin.gameObject;
+                return false;
+            }
+            return true;
+        }
+        [HarmonyPatch("LoadGameObject")]
         [HarmonyPostfix]
         static void LoadGameObject(AssetBundle bd, string s, GameObject __result)
         {

@@ -25,7 +25,7 @@ namespace SimpleResourceReplacer
                             {
                                 var ot = mat.GetTexture(mat.shader.GetPropertyName(i));
                                 if (((ot && d.TryGetValue(ot.name, out var r)) || d.TryGetValue("MatProp:" + mat.shader.GetPropertyName(i), out r)) && r.TryReplace<Texture>(out var t))
-                                        mat.SetTexture(mat.shader.GetPropertyName(i), t);
+                                    mat.SetTexture(mat.shader.GetPropertyName(i), t);
                             }
                 }
                 bool TryEditMats(Material[] mats)

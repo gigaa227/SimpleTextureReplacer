@@ -12,6 +12,17 @@ namespace SimpleResourceReplacer
     {
         public string bundle;
         public string resource;
-        public static implicit operator ResouceKey((string bundle, string resource) tuple) => new ResouceKey() { bundle = tuple.bundle, resource = tuple.resource };
+        public string FullResourceString => bundle + '/' + resource;
+        public ResouceKey(string bundle, string resource)
+        {
+            this.bundle = bundle;
+            this.resource = resource;
+        }
+        public ResouceKey(string FullResourceString)
+        {
+            resource = FullResourceString.After('/');
+            bundle = FullResourceString.Remove(FullResourceString.Length - 1 - resource.Length);
+        }
+        public static implicit operator ResouceKey((string bundle, string resource) tuple) => new ResouceKey(tuple.bundle, tuple.resource);
     }
 }
