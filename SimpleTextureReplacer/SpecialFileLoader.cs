@@ -23,7 +23,7 @@ namespace SimpleResourceReplacer
             {
                 zippedFiles.Remove(file);
                 foreach (var k in h.Keys)
-                    if (acceptableFileTypes.TryGetFileHandler(k,out _))
+                    if (acceptableFileTypes.TryGetFileHandler(k,out _) || specialFileTypes.TryGetFileHandler(k, out _))
                         CheckFile(k);
             }
             if (FileExists(file))
@@ -90,7 +90,7 @@ namespace SimpleResourceReplacer
                 if (logging)
                     logger.LogInfo("Zip read complete. Attmpting to load contents");
                 foreach (var k in h.Keys)
-                    if (acceptableFileTypes.TryGetFileHandler(k,out _))
+                    if (acceptableFileTypes.TryGetFileHandler(k,out _) || specialFileTypes.TryGetFileHandler(k, out _))
                         CheckFile(k);
                 foreach (var k in h.Keys.ToArray()) // Release resources for GC but keep keys for later reference
                     h[k] = null;
