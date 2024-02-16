@@ -14,24 +14,14 @@ using System.Reflection;
 namespace SimpleResourceReplacer
 {
     [Serializable]
-    public class CustomSkin
+    public class CustomSkin : CustomDragonEquipment
     {
-        public string Name;
-        public int ItemID;
-        public string SkinIcon;
         public string[] TargetRenderers;
         public MaterialProperty[] MaterialData;
-        public int PetType;
         [OptionalField]
         public MeshOverrides Mesh;
         [OptionalField]
         public MaterialProperty[] HWMaterialData;
-        [OptionalField]
-        [NonSerialized]
-        public UserItemData userItem;
-        [OptionalField]
-        [NonSerialized]
-        public ItemData item;
         [OptionalField]
         [NonSerialized]
         public DragonSkin skin;
@@ -40,7 +30,7 @@ namespace SimpleResourceReplacer
         public DragonSkin hwskin;
 
 
-        public void Reapply()
+        protected override void Reapply()
         {
             if (Mesh != null)
             {
@@ -186,14 +176,9 @@ namespace SimpleResourceReplacer
                         Main.logger.LogWarning($"Custom Skin YOU SHOULD NEVER SEE THIS [target={md.Target},property={md.Property},value={md.Value}]");
             }
         }
-        public void Destroy()
+        public override void Destroy()
         {
-            if (Patch_InventoryCreation.hasRun)
-            {
-                foreach (var l in CommonInventoryData.pInstance.GetInventory().Values)
-                    l.RemoveAll(x => x.ItemID == item.ItemID);
-                Main.ItemData_RemoveFromCache(item.ItemID);
-            }
+            base.Destroy();
             skin._BabyMaterials.DestroyAll();
             skin._TeenMaterials.DestroyAll();
             skin._Materials.DestroyAll();
@@ -207,83 +192,19 @@ namespace SimpleResourceReplacer
                 hwskin._TitanMaterials.DestroyAll();
                 Object.Destroy(hwskin.gameObject);
             }
-            created.Remove(item.AssetName.After('/'));
+            customAssets.Remove(item.AssetName.After('/'));
         }
-        static Dictionary<string, CustomSkin> created = new Dictionary<string, CustomSkin>();
-        public static DragonSkin GetCustomAsset(string key)
+        protected override GameObject GetAsset(string key)
         {
-            if (Main.logging)
-                Main.logger.LogInfo($"Requested custom bundle asset {key}");
             var flag = key.StartsWith("HW");
-            if (flag)
-                key = key.Remove(0, 2);
-            if (!created.TryGetValue(key, out var s))
-                return null;
-            s.Reapply();
             if (Main.logging)
-                Main.logger.LogInfo($"Found requested asset {(flag ? s.hwskin : s.skin)}");
-            return flag ? s.hwskin : s.skin;
+                Main.logger.LogInfo($"Found requested asset {(flag ? hwskin : skin)}");
+            return (flag ? hwskin : skin)?.gameObject;
         }
-        static int uiid = -1;
-        public void Init()
+        protected override void Setup()
         {
-            userItem = new UserItemData()
-            {
-                ItemTier = null,
-                CreatedDate = new DateTime(638428661429519390L, DateTimeKind.Utc),
-                Item = item = new ItemData()
-                {
-                    AllowStacking = true,
-                    AssetName = $"{Main.CustomBundleName}/DragonSkin_{ItemID}",
-                    Attribute = new[]
-                    {
-                        new ItemAttribute()
-                        {
-                            Key = "PetTypeID",
-                            Value = PetType.ToString()
-                        }
-                    },
-                    Availability = null,
-                    BluePrint = null,
-                    CashCost = 0,
-                    Category = new[] { new ItemDataCategory() { CategoryId= Category.DragonSkin } },
-                    Cost = 0,
-                    CreativePoints = 0,
-                    Description = "A custom skin",
-                    Geometry2 = null,
-                    IconName = SkinIcon,
-                    InventoryMax = 1,
-                    IsNew = false,
-                    ItemID = ItemID,
-                    ItemName = Name,
-                    ItemNamePlural = null,
-                    ItemRarity = null,
-                    ItemSaleConfigs = null,
-                    ItemStates = new List<ItemState>(),
-                    ItemStatsMap = null,
-                    Locked = false,
-                    MemberSaleList = null,
-                    Points = null,
-                    PopularRank = -1,
-                    PossibleStatsMap = null,
-                    RankId = null,
-                    Relationship = null,
-                    RewardTypeID = 0,
-                    Rollover = null,
-                    SaleFactor = 0,
-                    SaleList = null,
-                    Stackable = true,
-                    Texture = null,
-                    Uses = -1
-                },
-                ItemID = item.ItemID,
-                ItemStats = null,
-                ModifiedDate = new DateTime(638428661429519390L, DateTimeKind.Utc),
-                Quantity = 1,
-                UserItemAttributes = null,
-                UserInventoryID = uiid--,
-                Uses = item.Uses
-            };
+            item.AssetName = $"{Main.CustomBundleName}/DragonSkin_{ItemID}";
+            item.Category = new[] { new ItemDataCategory() { CategoryId = Category.DragonSkin } };
             skin = new GameObject(item.AssetName.After('/')).AddComponent<DragonSkin>();
             Object.DontDestroyOnLoad(skin.gameObject);
             if (MaterialData != null)
@@ -332,16 +253,9 @@ namespace SimpleResourceReplacer
                     hwskin._TitanLODMaterials = hwskin._TitanMaterials;
                 }
             }
-            created[item.AssetName.After('/')] = this;
+            customAssets[item.AssetName.After('/')] = this;
             if (Main.logging)
                 Main.logger.LogInfo($"Created skin {Name} as asset {item.AssetName.After('/')}");
-            if (Patch_InventoryCreation.hasRun)
-            {
-                foreach (var l in CommonInventoryData.pInstance.GetInventory().Values)
-                    l.RemoveAll(x => x.ItemID == item.ItemID);
-                CommonInventoryData.pInstance.AddToCategories(userItem);
-                ItemData.AddToCache(item);
-            }
         }
         static Material _t;
         static Shader _s;

@@ -40,13 +40,13 @@ namespace SimpleResourceReplacer
             {
                 if (Main.logging)
                     Main.logger.LogInfo($"LoadGameObject using custom bundle [resource={s}]");
-                var skin = CustomSkin.GetCustomAsset(s);
-                if (skin == null)
+                var asset = CustomDragonEquipment.GetCustomAsset(s);
+                if (asset == null)
                 {
                     Main.logger.LogWarning($"Custom asset {s} not found?");
                     return true;
                 }
-                __result = skin.gameObject;
+                __result = asset;
                 return false;
             }
             return true;

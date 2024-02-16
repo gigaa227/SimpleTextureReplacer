@@ -18,7 +18,7 @@ namespace SimpleResourceReplacer
             hasRun = true;
             if (Main.logging)
                 Main.logger.LogInfo("Adding custom skin items to inventory");
-            foreach (var i in Main.skinFiles.Values)
+            foreach (var i in Main.equipmentFiles.Values)
             {
                 if (Main.logging)
                     Main.logger.LogInfo("Adding item to inventory: " + Newtonsoft.Json.JsonConvert.SerializeObject(i.userItem));

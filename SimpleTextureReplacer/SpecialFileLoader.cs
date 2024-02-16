@@ -98,27 +98,27 @@ namespace SimpleResourceReplacer
         }
     }
 
-    public class SkinLoader : SpecialFileLoader
+    public class EquipmentLoader<T> : SpecialFileLoader where T : CustomDragonEquipment, new() 
     {
-        static DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(CustomSkin));
+        static DataContractJsonSerializer deserializer = new DataContractJsonSerializer(typeof(T));
         public override void Handle(string file)
         {
-            if (skinFiles.TryGetValue(file, out var skin))
+            if (equipmentFiles.TryGetValue(file, out var skin))
             {
                 skin.Destroy();
-                skinFiles.Remove(file);
+                equipmentFiles.Remove(file);
             }
             if (FileExists(file))
                 using (var stream = FileOpenRead(file))
                     try
                     {
-                        skinFiles[file] = skin = (CustomSkin)deserializer.ReadObject(stream);
+                        equipmentFiles[file] = skin = (CustomDragonEquipment)deserializer.ReadObject(stream);
                         skin.Init();
                         logger.LogInfo($"Loaded custom skin data for {skin.Name} from \"{file}\"");
                     }
                     catch (Exception e)
                     {
-                        skinFiles.Remove(file);
+                        equipmentFiles.Remove(file);
                         logger.LogError(e);
                         return;
                     }

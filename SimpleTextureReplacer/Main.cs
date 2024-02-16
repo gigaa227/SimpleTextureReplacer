@@ -16,7 +16,7 @@ using BepInEx.Logging;
 
 namespace SimpleResourceReplacer
 {
-    [BepInPlugin("com.aidanamite.SimpleTextureReplacer", "Simple Resource Replacer", "2.1.1")]
+    [BepInPlugin("com.aidanamite.SimpleTextureReplacer", "Simple Resource Replacer", "2.2.0")]
     public class Main : BaseUnityPlugin
     {
         public const string CustomBundleName = "RS_SHARED/customassets";
@@ -26,7 +26,7 @@ namespace SimpleResourceReplacer
         public static Dictionary<string, (Object obj, Keys keys)> Loaded = new Dictionary<string, (Object, Keys)>();
         public static Dictionary<string, HashSet<Object>> Generated = new Dictionary<string, HashSet<Object>>();
         public static Dictionary<string, Dictionary<string, object>> zippedFiles = new Dictionary<string, Dictionary<string, object>>();
-        public static Dictionary<string, CustomSkin> skinFiles = new Dictionary<string, CustomSkin>();
+        public static Dictionary<string, CustomDragonEquipment> equipmentFiles = new Dictionary<string, CustomDragonEquipment>();
         public static ConcurrentQueue<string> filechanges = new ConcurrentQueue<string>();
         public static Dictionary<string,FileLoader> acceptableFileTypes = new Dictionary<string, FileLoader>
         {
@@ -38,7 +38,8 @@ namespace SimpleResourceReplacer
         public static Dictionary<string, SpecialFileLoader> specialFileTypes = new Dictionary<string, SpecialFileLoader>
         {
             { ".zip", new ZipLoader() },
-            { ".skin", new SkinLoader() }
+            { ".skin", new EquipmentLoader<CustomSkin>() },
+            { ".saddle", new EquipmentLoader<CustomSaddle>() }
         };
         public static AssetBundle dummyBundle;
         public static ManualLogSource logger;

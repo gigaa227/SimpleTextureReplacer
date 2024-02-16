@@ -10,7 +10,7 @@ namespace SimpleResourceReplacer
     {
         [HarmonyPatch("LoadAssetFromBundle", typeof(string), typeof(string), typeof(RsResourceEventHandler), typeof(Type), typeof(bool), typeof(object))]
         [HarmonyPrefix]
-        static void LoadAssetFromBundleAsync(string inBundleURL, string inAssetName, ref RsResourceEventHandler inCallback, Type inType, bool inDontDestroy = false, object inUserData = null)
+        static bool LoadAssetFromBundleAsync(string inBundleURL, string inAssetName, ref RsResourceEventHandler inCallback, Type inType, bool inDontDestroy = false, object inUserData = null)
         {
             if (Main.logging)
                 Main.logger.LogInfo($"LoadAssetFromBundleAsync  bundle={inBundleURL},resource={inAssetName}");
@@ -29,6 +29,16 @@ namespace SimpleResourceReplacer
                     originalCallback?.Invoke(url, even, progress, obj, data);
                 };
             }
+            if (inBundleURL == Main.CustomBundleName && (typeof(Component).IsAssignableFrom(inType) || inType == typeof(GameObject)))
+            {
+                var go = CustomDragonEquipment.GetCustomAsset(inAssetName);
+                if (go)
+                {
+                    inCallback?.Invoke(RsResourceManager.FormatBundleURL(inBundleURL) + "/" + inAssetName, RsResourceLoadEvent.COMPLETE, 1, inType == typeof(GameObject) ? (object)go : go.GetComponent(inType), inUserData);
+                    return false;
+                }
+            }
+            return true;
         }
         [HarmonyPatch("LoadAssetFromBundle", typeof(string), typeof(string), typeof(Type))]
         [HarmonyPrefix]
@@ -36,8 +46,15 @@ namespace SimpleResourceReplacer
         {
             if (Main.logging)
                 Main.logger.LogInfo($"LoadAssetFromBundle  bundle={inBundlePath},resource={inAssetName}");
-            if (typeof(Component).IsAssignableFrom(inType) || inType == typeof(GameObject))
-                return true;
+            if (inBundlePath == Main.CustomBundleName && (typeof(Component).IsAssignableFrom(inType) || inType == typeof(GameObject)))
+            {
+                var go = CustomDragonEquipment.GetCustomAsset(inAssetName);
+                if (go)
+                {
+                    __result = inType == typeof(GameObject) ? (object)go : go.GetComponent(inType);
+                    return false;
+                }    
+            }
             if (Main.SingleAssets.TryGetValue((inBundlePath,inAssetName),out var r) && r.TryReplace(inType,out var nObj))
             {
                 __result = nObj;
