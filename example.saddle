@@ -1,0 +1,8 @@
+{ // This file is in JSON format and any text after a // is comment that doesn't need to be included in your file
+	"Name": "Saddle Name Here", // This is the display name of the saddle
+	"ItemID": 1000000, // This must be unique. It cannot be the same as another item from the game or another pack's skin/saddle. It's recommend to mention your pack ids when sharing the pack
+	"SkinIcon": "RS_SHARED/customassets/IconName", // This is the bundle resource url used for fetching the saddle's icon. The "RS_SHARED/customassets" bundle *must* be used for adding new icons
+	"PetType": 111, // This is the "pet type id" of the type of dragon this saddle can be equipped on. Try checking out other item's data using "DEBUG" mode to see what you should set this to
+	"Mesh": "RS_SHARED/mydragonskins/Model", // This is an asset url of the model to use
+	"Texture": "RS_SHARED/customassets/saddleTex" // This is the bundle resource url used for fetching the saddle's texture. The "RS_SHARED/customassets" bundle *must* be used for custom textures
+}

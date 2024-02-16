@@ -1,6 +1,6 @@
 { // This file is in JSON format and any text after a // is comment that doesn't need to be included in your file
 	"Name": "Skin Name Here", // This is the display name of the skin
-	"ItemID": 1000000, // This must be unique. It cannot be the same as another item from the game or another pack's skin. It's recommend to mention your pack ids when sharing the pack
+	"ItemID": 1000000, // This must be unique. It cannot be the same as another item from the game or another pack's skin/saddle. It's recommend to mention your pack ids when sharing the pack
 	"SkinIcon": "RS_SHARED/customassets/IconName", // This is the bundle resource url used for fetching the skin's icon. The "RS_SHARED/customassets" bundle *must* be used for adding new icons
 	"TargetRenderers": [ "DragonRendererName" ], // This is name of the dragon's renderer component. Try checking out other item's data using "DEBUG" mode to see what you should set this to
 	"MaterialData": [ // This controls the properties set on the different materials of the skin. You can set as many properties as you want here. Note: If no teen values are given, the game will use the adult material data for teens
