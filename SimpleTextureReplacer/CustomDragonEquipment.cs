@@ -42,9 +42,7 @@ namespace SimpleResourceReplacer
             if (Main.logging)
                 Main.logger.LogInfo($"Requested custom bundle asset {key}");
             var flag = key.StartsWith("HW");
-            if (flag)
-                key = key.Remove(0, 2);
-            if (!customAssets.TryGetValue(key, out var s))
+            if (!customAssets.TryGetValue(flag ? key.Remove(0, 2) : key, out var s))
                 return null;
             s.Reapply();
             return s.GetAsset(key);
