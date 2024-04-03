@@ -4,19 +4,20 @@
 	"SkinIcon": "RS_SHARED/customassets/IconName", // This is the bundle resource url used for fetching the skin's icon. The "RS_SHARED/customassets" bundle *must* be used for adding new icons
 	"TargetRenderers": [ "DragonRendererName" ], // This is name of the dragon's renderer component. Try checking out other item's data using "DEBUG" mode to see what you should set this to
 	"MaterialData": [ // This controls the properties set on the different materials of the skin. You can set as many properties as you want here. Note: If no teen values are given, the game will use the adult material data for teens
+		// Look to the shaders section for a list of material properties
 		{
-			"Target": "Adult", // This controls which material the property is set on. This must specify the age it's being applied to "Baby", "Teen", "Adult" or "Titan", then it *can* be followed by either "Eye" or "Body". If eye or body is not specified, it will affect both
-			"Property": "_DetailTex", // This is the target property of the material. For texture properties it can be "_BumpMap", "_ColorMask", "_DecalMap", "_DetailTex", "_EmissiveMap", "_MKGlowTex" or "_SpecularMap"
+			"Target": "Adult", // This controls which material the property is set on. This must specify the age it's being applied to "Baby", "Teen", "Adult" or "Titan", then it can be followed by "Eye", "Body", "Extra", "All" or nothing. If it's followed by nothing, it will affect both eyes and body materials
+			"Property": "_DetailTex", // This is the target property of the material
 			"Value": "RS_SHARED/mydragonskins/my_textureName" // To specify a texture you put in the asset url of the texture
 		},
 		{
 			"Target": "AdultBody",
-			"Property": "_SpecColor", // For color properties it can be "_EmissiveColor", "_MKGlowColor", "_MKGlowTexColor" or "_SpecColor"
+			"Property": "_SpecColor",
 			"Value": "333333" // To specify a color, use the color's hex string. It can either be "RRGGBB" or "AARRGGBB"
 		},
 		{
 			"Target": "TitanEye",
-			"Property": "_Glossiness", // For number properties it can be "_BumpStrength", "_DecalOpacity", "_Glossiness", "_MKGlowPower", "_MKGlowTexStrength"
+			"Property": "_Glossiness",
 			"Value": "0.9" // Despite being a number, you still need to write the number in " "
 		}
 	],
@@ -36,5 +37,40 @@
 	"Mesh": { // Optional: This is used to set the skin's custom meshes. Note: If teen model is not set, the game will use the adult model for teens. You can set "Baby", "Teen", "Adult" and or "Titan". Any model not set will reuse the og model
 		"Adult": "RS_SHARED/mydragonskins/Model", // This is an asset url of the model to use
 		"Titan": "RS_SHARED/mydragonskins/ModelTitan"
+	},
+	"RequiredAge": "TEEN", // Optional: This is the minimum age that a dragon must be to equip this saddle (Must be in all caps). If this is unset, it will default to teen
+	"BabyShaders": { // Optional: This is the shader that should be used for each of the baby's materials. If not set, each part will default as described below
+		// Each of these use a shader specifier:
+		// • "Default" will use the standard body material. This is the only shader that can be affected by player customization
+		//	◘ Texture Properties: "_BumpMap", "_ColorMask", "_DecalMap", "_DetailTex", "_EmissiveMap", "_MKGlowTex", "_SpecularMap"
+		//	◘ Color Properties: "_EmissiveColor", "_MKGlowColor", "_MKGlowTexColor", "_SpecColor"
+		//	◘ Number Properties: "_BumpStrength", "_DecalOpacity", "_Glossiness", "_MKGlowPower", "_MKGlowTexStrength"
+		// • "Eyes" will use the standard eye material
+		//	◘ Texture Properties: "_MainTex"
+		//	◘ Color Properties: "_Color", "_SpecColor", "_Emission"
+		//	◘ Number Properties: "_Shininess"
+		// • "Extra" will use a translucent material
+		//	◘ Texture Properties: "_MainTex"
+		//	◘ Color Properties: "_Color", "_SpecColor", "_Emission"
+		//	◘ Number Properties: "_Shininess"
+		// • If you want to use a different shader that you know the name of, you can put that in instead like "Standard/Unlit"
+		"Body": "Default", // Optional: If not set, will default to "Default"
+		"Eyes": "Default", // Optional: If not set, will default to "Default"
+		"Extra": "Extra" // Optional: If not set, will default to "Extra". The "extra" material will only be created if some material properties are set for it
+	},
+	"TeenShaders: { // Optional: Same as "BabyShaders" but applies for the teen materials
+		"Body": "Default",
+		"Eyes": "Default",
+		"Extra": "Extra"
+	},
+	"AdultShaders: { // Optional: Same as "BabyShaders" but applies for the adult materials
+		"Body": "Default",
+		"Eyes": "Default",
+		"Extra": "Extra"
+	},
+	"TitanShaders: { // Optional: Same as "BabyShaders" but applies for the titan materials
+		"Body": "Default",
+		"Eyes": "Default",
+		"Extra": "Extra"
 	}
 }

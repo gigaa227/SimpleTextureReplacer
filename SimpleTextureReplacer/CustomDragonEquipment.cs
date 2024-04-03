@@ -21,6 +21,8 @@ namespace SimpleResourceReplacer
         public string SkinIcon;
         public int PetType;
         [OptionalField]
+        public string RequiredAge = "TEEN";
+        [OptionalField]
         [NonSerialized]
         public UserItemData userItem;
         [OptionalField]
@@ -66,6 +68,11 @@ namespace SimpleResourceReplacer
                         {
                             Key = "PetTypeID",
                             Value = PetType.ToString()
+                        },
+                        new ItemAttribute()
+                        {
+                            Key = "PetStage",
+                            Value = RequiredAge
                         }
                     },
                     Availability = null,
