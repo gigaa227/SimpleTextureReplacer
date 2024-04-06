@@ -296,6 +296,10 @@ namespace SimpleResourceReplacer
                 if (!shader)
                 {
                     shader = Shader.Find(shaderName);
+                    if (!shader && shaderName.Contains("/") && Main.SingleAssets.TryGetValue(new ResouceKey(shaderName), out var a) && a.TryReplace<Shader>(out var s))
+                        shader = s;
+                    if (!shader)
+                        shader = Resources.FindObjectsOfTypeAll<Shader>().FirstOrDefault(x => x.name == shaderName);
                     if (!shader)
                     {
                         Main.logger.LogWarning($"Shader \"{shaderName}\" was not found");

@@ -53,7 +53,8 @@
 		//	◘ Texture Properties: "_MainTex"
 		//	◘ Color Properties: "_Color", "_SpecColor", "_Emission"
 		//	◘ Number Properties: "_Shininess"
-		// • If you want to use a different shader that you know the name of, you can put that in instead like "Standard/Unlit"
+		// • If you want to use your own shader loaded from an assetbundle, you can write the resource path
+		// • If you want to use a different shader that's already in the game, you can just write the name like "Standard/Unlit"
 		"Body": "Default", // Optional: If not set, will default to "Default"
 		"Eyes": "Default", // Optional: If not set, will default to "Default"
 		"Extra": "Extra" // Optional: If not set, will default to "Extra". The "extra" material will only be created if some material properties are set for it
