@@ -73,6 +73,18 @@ namespace SimpleResourceReplacer
                     }
                 }
             }
+            if (meta.Length > 4 + type)
+            {
+                if (Enum.TryParse(meta[4 + type], true, out FilterMode n))
+                {
+                    (obj as Texture2D).filterMode = n;
+                }
+                else
+                {
+                    logger.LogError($"Problem loading custom texture resource \"{file}\". Reason: {metaName} meta filter mode value \"{meta[3 + type]}\" was not a valid filter mode");
+                    return false;
+                }
+            }
             var data = type == 0 ? Main.SingleAssets.GetOrCreate(rKey) : Main.GameObjects.GetOrCreate(rKey).GetOrCreate(meta[3]);
             if (type == 0)
                 keys.SingleAssets.Add(rKey);
